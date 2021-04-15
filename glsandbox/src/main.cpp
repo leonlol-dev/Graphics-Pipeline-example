@@ -18,6 +18,11 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
+//Functions
+
+void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL_Event event);
+
+
 int main(int argc, char* argv[])
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -39,6 +44,7 @@ int main(int argc, char* argv[])
 	{
 		throw std::exception();
 	}
+
 
 	const GLfloat colors[] = {
   1.0f, 0.0f, 0.0f, 1.0f,
@@ -283,7 +289,10 @@ int main(int argc, char* argv[])
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+	//Camera / view matrix stuff (setting variables outside of LOOP)
+	glm::vec3 position(0.f);
+	glm::vec3 rotation(0.f);
+	glm::vec3 scale(1.f);
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -300,13 +309,16 @@ int main(int argc, char* argv[])
 	while (!quit)
 	{
 		SDL_Event event = { 0 };
+	
 
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT)
 			{
 				quit = true;
-			}
+			} 
+
+			updateInput(position, rotation, scale, event);
 		}
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -317,19 +329,25 @@ int main(int argc, char* argv[])
 
 		// Prepare the model matrix
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(0, 0, 0));
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0, 0, -10));
+		//model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// view matrix
 		glm::mat4 view(1.0f);
-		view = glm::translate(view, glm::vec3(0, 0, 10));
-		view = glm::rotate(view, glm::radians(0 * 0.03f), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::translate(view, position);
+		view = glm::rotate(view, glm::radians(rotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::scale(view, scale);
 		//view = glm::rotate(view, glm::radians(angle * 0.03f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//view = glm::inverse(view);
-	
+		view = glm::inverse(view);
+		
 
 		// Increase the float angle so next frame the triangle rotates further
 		angle += 0.8f;
+
+		// Move
+		
 
 		// Draw shape as before
 		////////////////////////////////
@@ -346,8 +364,7 @@ int main(int argc, char* argv[])
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Upload the projection matrix
-			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE,
-				glm::value_ptr(projection));
+			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		// upload the view matrix
 
@@ -371,4 +388,77 @@ int main(int argc, char* argv[])
 	SDL_Quit();
 
 	return 0;
+}
+
+void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL_Event event)
+{
+	bool leftKey = false;
+	bool rightKey = false;
+	bool upKey = false;
+	bool downKey = false;
+
+	int mouse_x = 0;
+	int mouse_y = 0;
+
+	int x = WINDOW_WIDTH;
+	int y = WINDOW_HEIGHT;
+
+	if (event.type == SDL_KEYDOWN)
+	{
+		switch (event.key.keysym.sym)
+		{
+		case SDLK_a:
+			position.x += 0.3f;
+			std::cout << "left" << std::endl;
+			break;
+
+		case SDLK_d:
+			position.x -= 0.3f;
+			std::cout << "right" << std::endl;
+			break;
+
+		case SDLK_w:
+			position.z += 0.3f;
+			std::cout << "up" << std::endl;
+			break;
+
+		case SDLK_s:
+			position.z -= 0.3f;
+			std::cout << "down" << std::endl;
+			break;
+
+		case SDLK_q:
+			rotation.y += 1.0f;
+			break;
+
+		case SDLK_e:
+			rotation.y -= 1.0f;
+			break;
+		}
+	}
+
+	if (event.type == SDL_KEYDOWN)
+	{
+		switch (event.key.keysym.sym)
+		{
+		case SDLK_a:
+			leftKey = false;
+			break;
+
+		case SDLK_d:
+			rightKey = false;
+			break;
+
+		case SDLK_w:
+			upKey = false;
+			break;
+
+		case SDLK_s:
+			downKey = false;
+			break;
+		}
+	}
+
+
+
 }
