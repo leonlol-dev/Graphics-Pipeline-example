@@ -21,6 +21,9 @@
 //Functions
 
 void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL_Event event);
+void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId);
+void displayToScreen(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId);
+void display(SDL_Window* window, std::shared_ptr<VertexArray> cat, std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId);
 
 
 int main(int argc, char* argv[])
@@ -96,6 +99,7 @@ int main(int argc, char* argv[])
 	vao->setBuffer(1, colorVbo);
 
 	std::shared_ptr<VertexArray> cat = std::make_shared<VertexArray>("models/curuthers/curuthers.obj");
+	std::shared_ptr<VertexArray> cat2 = std::make_shared<VertexArray>("models/curuthers/curuthers.obj");
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,6 +210,26 @@ int main(int argc, char* argv[])
 	//Unbind texture
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	//Render texture stuff
+	GLuint fbo = 0;
+	glGenFramebuffers(1, &fbo);
+	if (!fbo)
+	{
+		throw std::exception();
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+
+	GLuint fbt = 0;
+	glGenTextures(1, &fbt);
+	glBindTexture(GL_TEXTURE_2D, fbt);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbt, 0);
 
 
 
@@ -320,8 +344,8 @@ int main(int argc, char* argv[])
 
 			updateInput(position, rotation, scale, event);
 		}
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Prepare the perspective projection matrix
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
@@ -347,7 +371,7 @@ int main(int argc, char* argv[])
 		angle += 0.8f;
 
 		// Move
-		
+	
 
 		// Draw shape as before
 		////////////////////////////////
@@ -355,13 +379,14 @@ int main(int argc, char* argv[])
 		glUseProgram(programId);
 		//glBindVertexArray(vao->getId());
 		glBindVertexArray(cat->getId());
+		glBindVertexArray(cat2->getId());
 
 		//texture stuff
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		glEnable(GL_DEPTH_TEST);
 
 		// Upload the model matrix
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Upload the projection matrix
 			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -374,13 +399,16 @@ int main(int argc, char* argv[])
 			//glUniform1i(uniformId, 1);
 
 		// Draw 3 vertices (a triangle)
-		glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
+		//glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
+
+			display(window, cat, cat2, modelLoc, textureId);
+
 
 		// Reset the state
 		glBindVertexArray(0);
 		glUseProgram(0);
 		glDisable(GL_DEPTH_TEST);
-		SDL_GL_SwapWindow(window);
+		//SDL_GL_SwapWindow(window);
 
 	}
 
@@ -461,4 +489,54 @@ void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL
 
 
 
+}
+
+void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId)
+{
+	//Clear Screen
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//Display cat
+	glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glEnable(GL_DEPTH_TEST);
+	
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, glm::vec3(2, 0, -10));
+	model = glm::rotate(model, glm::radians(0.9f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+}
+
+void displayToScreen(std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId)
+{
+	
+
+	//Clear Screen
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//Display Cat 90 degrees
+	glDrawArrays(GL_TRIANGLES, 0, cat2->getVertCount());
+
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, glm::vec3(-2, 0, -10));
+	model = glm::rotate(model, glm::radians(0.9f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+
+
+
+
+}
+
+void display(SDL_Window* window, std::shared_ptr<VertexArray> cat, std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId)
+{
+	displayToTexture(cat, modelLoc, textureId);
+	displayToScreen(cat2, modelLoc, textureId);
+
+	SDL_GL_SwapWindow(window);
 }

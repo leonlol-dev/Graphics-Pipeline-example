@@ -1,3 +1,4 @@
 ﻿  main.cpp
-C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\src\main.cpp(377,52): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\src\main.cpp(481,51): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\src\main.cpp(502,52): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   GLSandbox.vcxproj -> C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\x64\Debug\GLSandbox.exe
