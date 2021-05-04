@@ -21,10 +21,10 @@
 //Functions
 
 void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL_Event event);
+
 void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId);
 void displayToScreen(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId);
 void display(SDL_Window* window, std::shared_ptr<VertexArray> cat, std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId);
-
 
 int main(int argc, char* argv[])
 {
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 	// VertexBuffer* positionsVbo = new VertexBuffer();
 
 	//Texture Loading
-	
+
 	int w = 0;
 	int h = 0;
 	int channels = 0;
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
 	//Create Colour Buffer 
 	std::shared_ptr<VertexBuffer> colorVbo = std::make_shared<VertexBuffer>();
-	colorVbo->add(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); 
+	colorVbo->add(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	colorVbo->add(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 	colorVbo->add(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 
@@ -99,7 +99,6 @@ int main(int argc, char* argv[])
 	vao->setBuffer(1, colorVbo);
 
 	std::shared_ptr<VertexArray> cat = std::make_shared<VertexArray>("models/curuthers/curuthers.obj");
-	std::shared_ptr<VertexArray> cat2 = std::make_shared<VertexArray>("models/curuthers/curuthers.obj");
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +169,7 @@ int main(int argc, char* argv[])
 	// Create a new fragment shader, attach source code, compile it and
 	// check for errors.
 	GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShaderId, 1, &fragmentShaderSrc, NULL); 
+	glShaderSource(fragmentShaderId, 1, &fragmentShaderSrc, NULL);
 	glCompileShader(fragmentShaderId);
 
 	glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &success);
@@ -210,26 +209,6 @@ int main(int argc, char* argv[])
 	//Unbind texture
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//Render texture stuff
-	GLuint fbo = 0;
-	glGenFramebuffers(1, &fbo);
-	if (!fbo)
-	{
-		throw std::exception();
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-
-	GLuint fbt = 0;
-	glGenTextures(1, &fbt);
-	glBindTexture(GL_TEXTURE_2D, fbt);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbt, 0);
 
 
 
@@ -239,13 +218,13 @@ int main(int argc, char* argv[])
 
 
 
-	
+
 	// Create new shader program and attach our shader objects
 	GLuint programId = glCreateProgram();
 	glAttachShader(programId, vertexShaderId);
 	glAttachShader(programId, fragmentShaderId);
 
-	
+
 
 
 	// Ensure the VAO "position" attribute stream gets set as the first position
@@ -310,7 +289,7 @@ int main(int argc, char* argv[])
 	{
 		throw std::exception();
 	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Camera / view matrix stuff (setting variables outside of LOOP)
@@ -333,14 +312,14 @@ int main(int argc, char* argv[])
 	while (!quit)
 	{
 		SDL_Event event = { 0 };
-	
+
 
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT)
 			{
 				quit = true;
-			} 
+			}
 
 			updateInput(position, rotation, scale, event);
 		}
@@ -365,13 +344,13 @@ int main(int argc, char* argv[])
 		view = glm::scale(view, scale);
 		//view = glm::rotate(view, glm::radians(angle * 0.03f), glm::vec3(0.0f, 1.0f, 0.0f));
 		view = glm::inverse(view);
-		
+
 
 		// Increase the float angle so next frame the triangle rotates further
 		angle += 0.8f;
 
 		// Move
-	
+
 
 		// Draw shape as before
 		////////////////////////////////
@@ -379,7 +358,7 @@ int main(int argc, char* argv[])
 		glUseProgram(programId);
 		//glBindVertexArray(vao->getId());
 		glBindVertexArray(cat->getId());
-		glBindVertexArray(cat2->getId());
+
 
 		//texture stuff
 		glBindTexture(GL_TEXTURE_2D, textureId);
@@ -389,19 +368,19 @@ int main(int argc, char* argv[])
 			//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Upload the projection matrix
-			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		// upload the view matrix
 
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(glm::inverse(view)));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(glm::inverse(view)));
 
-			// uniform id
-			//glUniform1i(uniformId, 1);
+		// uniform id
+		//glUniform1i(uniformId, 1);
 
-		// Draw 3 vertices (a triangle)
-		//glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
+	// Draw 3 vertices (a triangle)
+	//glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
 
-			display(window, cat, cat2, modelLoc, textureId);
+		display(window, cat, cat, modelLoc, textureId);
 
 
 		// Reset the state
@@ -494,14 +473,14 @@ void updateInput(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale, SDL
 void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint textureId)
 {
 	//Clear Screen
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Display cat
 	glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	glEnable(GL_DEPTH_TEST);
-	
+
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, glm::vec3(2, 0, -10));
 	model = glm::rotate(model, glm::radians(0.9f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -512,7 +491,7 @@ void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint t
 
 void displayToScreen(std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId)
 {
-	
+
 
 	//Clear Screen
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
@@ -536,7 +515,7 @@ void displayToScreen(std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint t
 void display(SDL_Window* window, std::shared_ptr<VertexArray> cat, std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId)
 {
 	displayToTexture(cat, modelLoc, textureId);
-	displayToScreen(cat2, modelLoc, textureId);
+	displayToScreen(cat, modelLoc, textureId);
 
 	SDL_GL_SwapWindow(window);
 }

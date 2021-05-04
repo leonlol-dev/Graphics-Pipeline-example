@@ -1,2 +1,1 @@
 C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\x64\Debug\GLSandbox.exe
-C:\Users\leons\OneDrive\Documents\University Local HDD\Year 2\2021\3D PG\Lab1\resources\glsandbox\x64\Debug\GLSandbox.pdb
