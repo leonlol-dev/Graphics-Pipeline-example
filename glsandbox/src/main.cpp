@@ -1,7 +1,7 @@
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
+
+#include "stb_image.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -12,8 +12,12 @@
 #include <iostream>
 #include <memory>
 
+#include "../Shader.h"
 #include "../VertexBuffer.h"
 #include "../VertexArray.h"
+
+
+
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -66,18 +70,21 @@ int main(int argc, char* argv[])
 
 	// VertexBuffer* positionsVbo = new VertexBuffer();
 
-	//Texture Loading
+	//texture loading
 
 	int w = 0;
 	int h = 0;
 	int channels = 0;
 
-	unsigned char* data = stbi_load("Whiskers_diffuse.png", &w, &h, &channels, 4);
-	if (!data)
+	/*unsigned char* texture = stbi_load("whiskers_diffuse.png", &w, &h, &channels, 4);
+	if (!texture)
 	{
 		throw std::exception();
-	}
+	}*/
+	//const char* a = "whiskers_diffuse.png";
 
+	std::shared_ptr<Texture> tex = std::make_shared<Texture>("whiskers_diffuse.png");
+	
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	//Create Position Buffer 
@@ -99,7 +106,8 @@ int main(int argc, char* argv[])
 	vao->setBuffer(1, colorVbo);
 
 	std::shared_ptr<VertexArray> cat = std::make_shared<VertexArray>("models/curuthers/curuthers.obj");
-
+	
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const GLchar* vertexShaderSrc =
@@ -184,32 +192,33 @@ int main(int argc, char* argv[])
 		throw std::exception();
 	}
 
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creating and binding a texture
 
-	GLuint textureId = 0;
-	glGenTextures(1, &textureId);
+	//GLuint textureId = 0;
 
-	if (!textureId)
-	{
-		throw std::exception();
-	}
+	//
+	//glGenTextures(1, &textureId);
 
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	//if (!textureId)
+	//{
+	//	throw std::exception();
+	//}
 
-	// Upload image data to bound texture unit in the GPU
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	//glBindTexture(GL_TEXTURE_2D, textureId);
 
-	// Free the loaded data cus it has a copy on the gpu
-	free(data);
+	//// Upload image data to bound texture unit in the GPU
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 
-	// Generate mipmap so texture can be mapped correctly
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//// Free the loaded data cus it has a copy on the gpu
+	//free(texture);
 
-	//Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//// Generate mipmap so texture can be mapped correctly
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
-
+	////Unbind texture
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
@@ -361,8 +370,8 @@ int main(int argc, char* argv[])
 
 
 		//texture stuff
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		glEnable(GL_DEPTH_TEST);
+	/*	glBindTexture(GL_TEXTURE_2D, textureId);
+		glEnable(GL_DEPTH_TEST);*/
 
 		// Upload the model matrix
 			//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -380,7 +389,7 @@ int main(int argc, char* argv[])
 	// Draw 3 vertices (a triangle)
 	//glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
 
-		display(window, cat, cat, modelLoc, textureId);
+		display(window, cat, cat, modelLoc, tex ->getId());
 
 
 		// Reset the state
@@ -479,7 +488,7 @@ void displayToTexture(std::shared_ptr<VertexArray> cat, GLint modelLoc, GLuint t
 	//Display cat
 	glDrawArrays(GL_TRIANGLES, 0, cat->getVertCount());
 	glBindTexture(GL_TEXTURE_2D, textureId);
-	glEnable(GL_DEPTH_TEST);
+
 
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, glm::vec3(2, 0, -10));
@@ -514,6 +523,8 @@ void displayToScreen(std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint t
 
 void display(SDL_Window* window, std::shared_ptr<VertexArray> cat, std::shared_ptr<VertexArray> cat2, GLint modelLoc, GLuint textureId)
 {
+	glEnable(GL_DEPTH_TEST);
+
 	displayToTexture(cat, modelLoc, textureId);
 	displayToScreen(cat, modelLoc, textureId);
 
